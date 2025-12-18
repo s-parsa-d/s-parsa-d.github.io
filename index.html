@@ -1,32 +1,550 @@
-<!doctype html>
-<html lang="fa" dir="rtl">
+<!DOCTYPE html>
+<html lang="en">
 <head>
-	<meta charset="utf-8">
-	<meta name="viewport" content="width=device-width,initial-scale=1">
-	<title>معرفی — پارسا</title>
-	<link href="https://fonts.googleapis.com/css2?family=Vazirmatn:wght@300;500;700&display=swap" rel="stylesheet">
-	<style>
-		:root{--bg:#f5f7fb;--card:#fff;--accent:#6C63FF}
-		*{box-sizing:border-box}
-		html,body{height:100%;margin:0;font-family:'Vazirmatn',system-ui,-apple-system,Segoe UI,Roboto,Arial; background:linear-gradient(135deg,#e9eefb,#fefefe);color:#222}
-		.container{min-height:100vh;display:flex;align-items:center;justify-content:center;padding:2rem}
-		.card{background:var(--card);padding:2.2rem 2.5rem;border-radius:16px;box-shadow:0 8px 30px rgba(16,24,40,0.08);max-width:480px;text-align:center}
-		.avatar{width:96px;height:96px;border-radius:50%;background:linear-gradient(135deg,var(--accent),#2bd9bd);display:inline-flex;align-items:center;justify-content:center;color:white;font-weight:700;font-size:36px;margin-bottom:1rem}
-		.name{font-size:1.6rem;font-weight:700;margin:0 0 .25rem}
-		.role{margin:0;color:#5b6b7a}
-		.badge{display:inline-block;margin-top:1rem;padding:.35rem .65rem;border-radius:999px;background:#f1f5ff;color:var(--accent);font-weight:600;font-size:.9rem}
-		.small{color:#6b7280;font-size:.9rem;margin-top:.75rem}
-	</style>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Calculus Theorems Visualizer with Math Panel</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/mathjs/11.8.0/math.min.js"></script>
+    <script src="https://cdn.plot.ly/plotly-2.24.1.min.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700&family=Courier+Prime&display=swap" rel="stylesheet">
+
+    <style>
+        :root {
+            --primary-color: #2563eb;
+            --primary-hover: #1d4ed8;
+            --bg-color: #f1f5f9;
+            --card-bg: #ffffff;
+            --text-color: #334155;
+            --border-color: #e2e8f0;
+            --key-bg: #f8fafc;
+        }
+
+        body {
+            font-family: 'Roboto', sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            margin: 0;
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        .container {
+            width: 95%;
+            max-width: 1200px;
+            display: grid;
+            grid-template-columns: 350px 1fr;
+            gap: 20px;
+        }
+
+        @media (max-width: 850px) {
+            .container { grid-template-columns: 1fr; }
+        }
+
+        .card {
+            background: var(--card-bg);
+            padding: 20px;
+            border-radius: 12px;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+        }
+
+        h1 { text-align: center; color: var(--primary-color); margin-bottom: 25px; font-weight: 700; }
+        h2 { font-size: 1.1rem; border-bottom: 2px solid var(--border-color); padding-bottom: 10px; margin-top: 0; color: #475569; }
+
+        .input-group { margin-bottom: 15px; }
+        label { display: block; margin-bottom: 6px; font-weight: 600; font-size: 0.9rem; }
+        
+        input[type="text"], input[type="number"], select {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #cbd5e1;
+            border-radius: 6px;
+            box-sizing: border-box;
+            font-size: 0.95rem;
+            transition: border-color 0.2s;
+        }
+
+        input[type="text"]:focus, input[type="number"]:focus, select:focus {
+            outline: none;
+            border-color: var(--primary-color);
+            box-shadow: 0 0 0 2px rgba(37, 99, 235, 0.1);
+        }
+
+        input[type="text"] { font-family: 'Courier Prime', monospace; font-weight: bold; }
+
+        /* --- Math Keyboard Styles --- */
+        .math-keyboard {
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            overflow: hidden;
+            margin-top: 5px;
+            background: #fff;
+        }
+
+        .tabs {
+            display: flex;
+            background: #f1f5f9;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .tab {
+            flex: 1;
+            padding: 8px;
+            border: none;
+            background: transparent;
+            cursor: pointer;
+            font-size: 0.85rem;
+            font-weight: 600;
+            color: #64748b;
+            transition: all 0.2s;
+        }
+
+        .tab:hover { background: #e2e8f0; }
+        .tab.active {
+            background: #fff;
+            color: var(--primary-color);
+            border-bottom: 2px solid var(--primary-color);
+        }
+
+        .tab-content {
+            padding: 10px;
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 6px;
+        }
+
+        .key-btn {
+            padding: 8px 4px;
+            background: var(--key-bg);
+            border: 1px solid var(--border-color);
+            border-radius: 4px;
+            cursor: pointer;
+            font-family: 'Courier Prime', monospace;
+            font-size: 0.9rem;
+            color: #333;
+            transition: all 0.1s;
+        }
+
+        .key-btn:hover {
+            background: #e2e8f0;
+            transform: translateY(-1px);
+        }
+
+        .key-btn:active { transform: translateY(0); }
+
+        /* --- Action Button --- */
+        .action-btn {
+            width: 100%;
+            background-color: var(--primary-color);
+            color: white;
+            border: none;
+            padding: 12px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 1rem;
+            font-weight: bold;
+            transition: background 0.2s;
+            margin-top: 15px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .action-btn:hover { background-color: var(--primary-hover); }
+
+        /* --- Result Box --- */
+        #result-box {
+            margin-top: 20px;
+            padding: 15px;
+            background: #eff6ff;
+            border-radius: 6px;
+            border-left: 4px solid var(--primary-color);
+            font-size: 0.95rem;
+            line-height: 1.6;
+            min-height: 80px;
+        }
+
+        .math-tex { font-weight: bold; font-family: 'Courier Prime', monospace; color: #0f172a; }
+        
+        #plot-area {
+            width: 100%;
+            height: 650px;
+            background: white;
+            border-radius: 8px;
+        }
+
+        .helper-text { font-size: 0.75rem; color: #64748b; margin-top: 4px; }
+    </style>
 </head>
 <body>
-	<div class="container">
-		<div class="card" role="region" aria-label="معرفی پارسا">
-			<div class="avatar" aria-hidden="true">پ</div>
-			<h1 class="name">پارسا</h1>
-			<p class="role">دانشجوی رشته علوم کامپیوتر — دانشگاه فردوسی</p>
-			<div class="badge">سلام! خوش آمدی</div>
-			<p class="small">علاقه‌مند به برنامه‌نویسی و یادگیری چیزهای جدید.</p>
-		</div>
-	</div>
+
+    <h1>Calculus Theorems Visualizer</h1>
+
+    <div class="container">
+        <div class="card">
+            <h2>⚙️ Configuration</h2>
+            
+            <div class="input-group">
+                <label>Select Theorem:</label>
+                <select id="theoremType" onchange="toggleInputs()">
+                    <option value="IVT">Intermediate Value Theorem (IVT)</option>
+                    <option value="MVT">Mean Value Theorem (MVT)</option>
+                </select>
+            </div>
+
+            <div class="input-group">
+                <label>📚 Quick Presets:</label>
+                <select id="presetSelect" onchange="applyPreset()">
+                    <option value="" disabled selected>-- Load a Function --</option>
+                    <option value="x^3 - 2*x + 1">Polynomial: x³ - 2x + 1</option>
+                    <option value="sin(x)">Trigonometric: sin(x)</option>
+                    <option value="cos(x) + x/2">Mixed: cos(x) + x/2</option>
+                    <option value="exp(x/3)">Exponential: e^(x/3)</option>
+                    <option value="log(x)">Logarithmic: ln(x)</option>
+                    <option value="sqrt(x)">Radical: √x</option>
+                    <option value="1/x">Rational: 1/x</option>
+                </select>
+            </div>
+
+            <div class="input-group">
+                <label>Function f(x):</label>
+                <input type="text" id="funcInput" value="x^3 - 2*x + 1" placeholder="Type function here...">
+                
+                <div class="math-keyboard">
+                    <div class="tabs">
+                        <button class="tab active" onclick="switchTab('basic', this)">Basic</button>
+                        <button class="tab" onclick="switchTab('trig', this)">Trig</button>
+                        <button class="tab" onclick="switchTab('ops', this)">Ops</button>
+                    </div>
+
+                    <div id="basic" class="tab-content">
+                        <button class="key-btn" onclick="insertMath('^2')">□²</button>
+                        <button class="key-btn" onclick="insertMath('^')">^</button>
+                        <button class="key-btn" onclick="insertMath('sqrt()')">√□</button>
+                        <button class="key-btn" onclick="insertMath('(')"> ( </button>
+                        <button class="key-btn" onclick="insertMath(')')"> ) </button>
+                        <button class="key-btn" onclick="insertMath('x')"> x </button>
+                        <button class="key-btn" onclick="insertMath('+')">+</button>
+                        <button class="key-btn" onclick="insertMath('-')">-</button>
+                        <button class="key-btn" onclick="insertMath('log()')">ln</button>
+                        <button class="key-btn" onclick="insertMath('exp()')">eⁿ</button>
+                        <button class="key-btn" onclick="insertMath('pi')">π</button>
+                        <button class="key-btn" onclick="insertMath('/')">/</button>
+                    </div>
+
+                    <div id="trig" class="tab-content" style="display: none;">
+                        <button class="key-btn" onclick="insertMath('sin()')">sin</button>
+                        <button class="key-btn" onclick="insertMath('cos()')">cos</button>
+                        <button class="key-btn" onclick="insertMath('tan()')">tan</button>
+                        <button class="key-btn" onclick="insertMath('sec()')">sec</button>
+                        <button class="key-btn" onclick="insertMath('asin()')">sin⁻¹</button>
+                        <button class="key-btn" onclick="insertMath('acos()')">cos⁻¹</button>
+                        <button class="key-btn" onclick="insertMath('atan()')">tan⁻¹</button>
+                        <button class="key-btn" onclick="insertMath('pi')">π</button>
+                    </div>
+
+                     <div id="ops" class="tab-content" style="display: none;">
+                        <button class="key-btn" onclick="insertMath('abs()')">|x|</button>
+                        <button class="key-btn" onclick="insertMath('*')">×</button>
+                        <button class="key-btn" onclick="insertMath('/')">÷</button>
+                        <button class="key-btn" onclick="insertMath('e')">e</button>
+                        <button class="key-btn" onclick="insertMath('1/x')">1/x</button>
+                        <button class="key-btn" onclick="insertMath('^3')">□³</button>
+                        <button class="key-btn" onclick="insertMath('sqrt(x)')">√x</button>
+                        <button class="key-btn" onclick="insertMath('cbrt()')">∛</button>
+                    </div>
+                </div>
+            </div>
+
+            <div class="input-group" style="display: flex; gap: 10px;">
+                <div style="flex:1">
+                    <label>Start (a):</label>
+                    <input type="number" id="aInput" value="-1.5" step="0.1">
+                </div>
+                <div style="flex:1">
+                    <label>End (b):</label>
+                    <input type="number" id="bInput" value="1.5" step="0.1">
+                </div>
+            </div>
+
+            <div class="input-group" id="k-group">
+                <label>Target Value (k):</label>
+                <input type="number" id="kInput" value="0">
+                <div class="helper-text">Find c where f(c) = k</div>
+            </div>
+
+            <button class="action-btn" onclick="draw()">
+                <span>🚀 Analyze & Plot</span>
+            </button>
+
+            <div id="result-box">
+                Awaiting input...
+            </div>
+        </div>
+
+        <div class="card">
+            <div id="plot-area"></div>
+        </div>
+    </div>
+
+    <script>
+        // --- UI Interactions ---
+
+        // Tab Switching Logic
+        function switchTab(tabId, btnElement) {
+            // Hide all contents
+            document.querySelectorAll('.tab-content').forEach(el => el.style.display = 'none');
+            // Show selected
+            document.getElementById(tabId).style.display = 'grid';
+            
+            // Update Tab Styles
+            document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+            btnElement.classList.add('active');
+        }
+
+        // Insert Math at Cursor Logic
+        function insertMath(text) {
+            const input = document.getElementById('funcInput');
+            const start = input.selectionStart;
+            const end = input.selectionEnd;
+            const val = input.value;
+
+            // Insert text
+            input.value = val.substring(0, start) + text + val.substring(end);
+            
+            // Move cursor inside parenthesis if present
+            let newCursorPos = start + text.length;
+            if (text.endsWith('()')) {
+                newCursorPos -= 1;
+            }
+
+            input.focus();
+            input.selectionStart = input.selectionEnd = newCursorPos;
+        }
+
+        function toggleInputs() {
+            const type = document.getElementById('theoremType').value;
+            document.getElementById('k-group').style.display = (type === 'IVT') ? 'block' : 'none';
+        }
+
+        function applyPreset() {
+            const val = document.getElementById('presetSelect').value;
+            if (val) {
+                document.getElementById('funcInput').value = val;
+                
+                const aInput = document.getElementById('aInput');
+                const bInput = document.getElementById('bInput');
+                
+                // Smart ranges
+                if (val.includes("log") || val.includes("sqrt")) {
+                    aInput.value = 0.5; bInput.value = 5;
+                } else if (val.includes("sin") || val.includes("cos")) {
+                    aInput.value = 0; bInput.value = 6.28;
+                } else if (val === "1/x") {
+                    aInput.value = 0.5; bInput.value = 4;
+                } else {
+                    aInput.value = -2; bInput.value = 2;
+                }
+            }
+        }
+
+        // --- Core Calculus Logic ---
+        function draw() {
+            try {
+                // 1. Parse
+                const funcStr = document.getElementById('funcInput').value;
+                const a = parseFloat(document.getElementById('aInput').value);
+                const b = parseFloat(document.getElementById('bInput').value);
+                const type = document.getElementById('theoremType').value;
+                let k = parseFloat(document.getElementById('kInput').value);
+
+                if (a >= b) {
+                    alert("Error: Start (a) must be less than End (b).");
+                    return;
+                }
+
+                // 2. Math Engine
+                const node = math.parse(funcStr);
+                const code = node.compile();
+                const f = (x) => {
+                    try {
+                        const res = code.evaluate({x: x});
+                        if (typeof res === 'object' && 're' in res) return NaN; // No complex
+                        return res;
+                    } catch { return NaN; }
+                };
+
+                const fa = f(a);
+                const fb = f(b);
+
+                if (isNaN(fa) || isNaN(fb)) {
+                    document.getElementById('result-box').innerHTML = 
+                        `<span style="color:red">Error: Function undefined at endpoints.</span>`;
+                    return;
+                }
+
+                let resultHTML = "";
+                let pointsC = [];
+                let traces = [];
+
+                // 3. Data Generation
+                const xValues = [];
+                const yValues = [];
+                const nPoints = 600;
+                const step = (b - a) / nPoints;
+                
+                for (let i = 0; i <= nPoints; i++) {
+                    const x = a + i * step;
+                    const y = f(x);
+                    xValues.push(x);
+                    yValues.push(y);
+                }
+
+                // --- Theorem Logic ---
+                if (type === 'IVT') {
+                    resultHTML += `<strong>IVT Analysis:</strong><br>`;
+                    resultHTML += `Find <span class="math-tex">c</span> where <span class="math-tex">f(c) = ${k}</span><br>`;
+                    resultHTML += `<small>Range: [${fa.toFixed(2)}, ${fb.toFixed(2)}]</small><br><br>`;
+
+                    const targetFunc = (x) => f(x) - k;
+                    pointsC = findRootsInInterval(targetFunc, a, b);
+
+                    traces.push({
+                        x: [a, b], y: [k, k],
+                        mode: 'lines', name: `y = ${k}`,
+                        line: {dash: 'dash', color: 'green', width: 2}
+                    });
+
+                    if (pointsC.length > 0) {
+                        resultHTML += `<span style="color:green">✅ Found c:</span> `;
+                        resultHTML += pointsC.map(p => `<span class="math-tex">${p.toFixed(4)}</span>`).join(", ");
+                        pointsC.forEach(c => {
+                             traces.push({
+                                x: [c, c], y: [Math.min(...yValues.filter(v=>!isNaN(v))), k],
+                                mode: 'lines', showlegend: false,
+                                line: {dash: 'dot', color: 'red', width: 1}
+                            });
+                        });
+                    } else {
+                        resultHTML += `<span style="color:#f59e0b">No c found in this interval.</span>`;
+                    }
+                } else {
+                    // MVT
+                    const m = (fb - fa) / (b - a);
+                    resultHTML += `<strong>MVT Analysis:</strong><br>`;
+                    resultHTML += `Find <span class="math-tex">c</span> where <span class="math-tex">f'(c) = ${m.toFixed(4)}</span><br>`;
+
+                    let derivative;
+                    try { derivative = math.derivative(node, 'x'); } 
+                    catch { alert("Symbolic derivative failed."); return; }
+                    
+                    const fPrime = (x) => derivative.evaluate({x: x});
+                    const targetFunc = (x) => fPrime(x) - m;
+                    pointsC = findRootsInInterval(targetFunc, a, b);
+
+                    traces.push({
+                        x: [a, b], y: [fa, fb],
+                        mode: 'lines', name: 'Secant Line',
+                        line: {dash: 'dash', color: '#f59e0b', width: 2}
+                    });
+
+                    if (pointsC.length > 0) {
+                        resultHTML += `<span style="color:green">✅ Found c:</span> `;
+                        resultHTML += pointsC.map(p => `<span class="math-tex">${p.toFixed(4)}</span>`).join(", ");
+                        
+                        pointsC.forEach(c => {
+                            const fc = f(c);
+                            const tangentLen = (b-a)*0.15;
+                            const tangentX = [Math.max(a, c - tangentLen), Math.min(b, c + tangentLen)];
+                            const tangentY = tangentX.map(tx => m * (tx - c) + fc);
+                            traces.push({
+                                x: tangentX, y: tangentY,
+                                mode: 'lines', name: `Tangent @ ${c.toFixed(2)}`,
+                                line: {color: 'red', width: 2}
+                            });
+                        });
+                    } else {
+                        resultHTML += `<span style="color:#f59e0b">No parallel tangent found.</span>`;
+                    }
+                }
+
+                // --- Plotting ---
+                traces.unshift({
+                    x: xValues, y: yValues,
+                    mode: 'lines', name: 'f(x)',
+                    line: {color: '#2563eb', width: 3}
+                });
+
+                traces.push({
+                    x: [a, b], y: [fa, fb],
+                    mode: 'markers', name: 'Endpoints',
+                    marker: {size: 10, color: 'black'}
+                });
+
+                if (pointsC.length > 0) {
+                    traces.push({
+                        x: pointsC, 
+                        y: pointsC.map(c => f(c)),
+                        mode: 'markers', name: 'Points c',
+                        marker: {size: 14, color: 'red', symbol: 'star'}
+                    });
+                }
+
+                const layout = {
+                    title: 'Geometric Analysis',
+                    xaxis: {title: 'x'},
+                    yaxis: {title: 'f(x)'},
+                    hovermode: 'closest',
+                    dragmode: 'pan',
+                    font: {family: 'Roboto'},
+                    margin: {t: 50, r: 20, l: 50, b: 50}
+                };
+                
+                Plotly.newPlot('plot-area', traces, layout, {responsive: true, scrollZoom: true});
+                document.getElementById('result-box').innerHTML = resultHTML;
+
+            } catch (err) {
+                console.error(err);
+                document.getElementById('result-box').innerHTML = `<span style="color:red">Error: ${err.message}</span>`;
+            }
+        }
+
+        // --- Numerical Solvers ---
+        function findRootsInInterval(func, start, end, steps = 200) {
+            let roots = [];
+            let dx = (end - start) / steps;
+            let x = start;
+            let y = func(x);
+
+            for (let i = 0; i < steps; i++) {
+                let nextX = x + dx;
+                let nextY = func(nextX);
+                if (isNaN(y) || isNaN(nextY)) { x = nextX; y = nextY; continue; }
+                
+                if (y * nextY <= 0) {
+                    let root = bisection(func, x, nextX);
+                    if (!isNaN(root)) roots.push(root);
+                }
+                x = nextX; y = nextY;
+            }
+            return roots;
+        }
+
+        function bisection(func, x1, x2, tol = 1e-6) {
+            let mid = x1;
+            for (let i = 0; i < 60; i++) {
+                mid = (x1 + x2) / 2;
+                if (Math.abs(func(mid)) < tol || (x2 - x1) / 2 < tol) return mid;
+                if (Math.sign(func(mid)) === Math.sign(func(x1))) x1 = mid;
+                else x2 = mid;
+            }
+            return mid;
+        }
+
+        // Init
+        draw();
+    </script>
 </body>
 </html>
